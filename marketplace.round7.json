@@ -1,0 +1,8 @@
+{
+  "bookwyrm": {
+    "name": "BookWyrm",
+    "category": "Other",
+    "description": "Federated social reading catalog for tracking books, shelves and reviews.",
+    "image": "https://github.com/bookwyrm-social.png"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "ghcr.io/bookwyrm-social/bookwyrm:v0.9.3": "ghcr.io/bookwyrm-social/bookwyrm:v0.9.3@sha256:593acc3dae084371939cbdc847f887db481551c03ff5b91bb85ae2f446f42b3f",
+  "postgres:17": "postgres:17@sha256:f4c66b820c6f974249089d3d16d86a3698eae11e8746eb6644b2271031e91232",
+  "redis:7.4": "redis:7.4@sha256:c6eabf748fc7a61dbb5a705c78bcf3d6377b1127a97d0ce965c11c44ba46896f"
+}

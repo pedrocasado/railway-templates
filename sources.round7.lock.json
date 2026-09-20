@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-09-20T17:41:50.366728+00:00",
+  "candidates": {
+    "bookwyrm": {
+      "repository": "bookwyrm-social/bookwyrm",
+      "revision": "v0.9.3",
+      "commit": "3557c58c3f676813ae261ab5049ec65bb1574c42",
+      "stars": 2780,
+      "archived": false,
+      "pushedAt": "2026-09-17T16:44:15Z",
+      "readmeSha256": "d9b22f522394ad56a4850ab1eb150865e794bacbbd2ac38fb96154647ba49987",
+      "marketplace": [
+        {
+          "query": "BookWyrm",
+          "results": [],
+          "complete": true
+        },
+        {
+          "query": "Bookwyrm",
+          "results": [],
+          "complete": true
+        }
+      ]
+    }
+  },
+  "review": {}
+}

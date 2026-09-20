@@ -1,0 +1,214 @@
+{
+  "services": {
+    "d0d341ca-f766-51c3-846a-dda9e3225e31": {
+      "name": "postgres",
+      "source": {
+        "image": "postgres:17@sha256:f4c66b820c6f974249089d3d16d86a3698eae11e8746eb6644b2271031e91232"
+      },
+      "variables": {
+        "POSTGRES_USER": {
+          "isOptional": false,
+          "description": "PostgreSQL initialization user, or the matching connection user for the private database.",
+          "defaultValue": "bookwyrm"
+        },
+        "POSTGRES_DB": {
+          "isOptional": false,
+          "description": "Initial PostgreSQL database name, or the matching database selected by the application.",
+          "defaultValue": "bookwyrm"
+        },
+        "POSTGRES_PASSWORD": {
+          "isOptional": false,
+          "description": "PostgreSQL password. Generated for the database and referenced by dependent services; keep private.",
+          "defaultValue": "${{secret(64, \"abcdef0123456789\")}}"
+        },
+        "PGDATA": {
+          "isOptional": false,
+          "description": "PostgreSQL data directory within the persistent volume. Do not change on an existing database.",
+          "defaultValue": "/var/lib/postgresql/data/pgdata"
+        }
+      },
+      "deploy": {
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10,
+        "requiredMountPath": "/var/lib/postgresql/data"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {
+        "fce22db3-b075-5a94-ba1f-d1525bbeaff1": {
+          "mountPath": "/var/lib/postgresql/data"
+        }
+      }
+    },
+    "fe07e1c7-579b-5fb9-ad51-894cfebe5259": {
+      "name": "redis",
+      "source": {
+        "image": "redis:7.4@sha256:c6eabf748fc7a61dbb5a705c78bcf3d6377b1127a97d0ce965c11c44ba46896f"
+      },
+      "variables": {
+        "REDIS_PASSWORD": {
+          "isOptional": false,
+          "description": "Generated private Redis/Valkey password, or a reference to that password. Keep secret.",
+          "defaultValue": "${{secret(64, \"abcdef0123456789\")}}"
+        },
+        "REDIS_URL": {
+          "isOptional": false,
+          "description": "Private authenticated Redis/Valkey connection URL. Automatically assembled from service references.",
+          "defaultValue": "redis://:${{redis.REDIS_PASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:6379"
+        }
+      },
+      "deploy": {
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10,
+        "startCommand": "sh -c 'exec redis-server --bind 0.0.0.0 :: --appendonly yes --maxmemory-policy noeviction --requirepass \"$REDIS_PASSWORD\"'",
+        "requiredMountPath": "/data"
+      },
+      "networking": {
+        "serviceDomains": {}
+      },
+      "volumeMounts": {
+        "623ea7a2-1826-5278-87cc-fb0123bbac1d": {
+          "mountPath": "/data"
+        }
+      }
+    },
+    "f7be7554-37bb-55f4-a924-c5e60ee501d0": {
+      "name": "bookwyrm",
+      "source": {
+        "repo": "orenaksakal/railway-templates",
+        "branch": "main"
+      },
+      "variables": {
+        "DEBUG": {
+          "isOptional": false,
+          "description": "Debug for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "false"
+        },
+        "DOMAIN": {
+          "isOptional": false,
+          "description": "Domain resolved automatically from the linked service. Keep this reference when using the included topology.",
+          "defaultValue": "${{bookwyrm.RAILWAY_PUBLIC_DOMAIN}}"
+        },
+        "SECRET_KEY": {
+          "isOptional": false,
+          "description": "Generated secret key. Keep private and preserve with backups.",
+          "defaultValue": "${{secret(50, \"abcdef0123456789\")}}"
+        },
+        "POSTGRES_HOST": {
+          "isOptional": false,
+          "description": "Private PostgreSQL hostname. Automatically resolved from the postgres service.",
+          "defaultValue": "${{postgres.RAILWAY_PRIVATE_DOMAIN}}"
+        },
+        "POSTGRES_USER": {
+          "isOptional": false,
+          "description": "PostgreSQL initialization user, or the matching connection user for the private database.",
+          "defaultValue": "bookwyrm"
+        },
+        "POSTGRES_DB": {
+          "isOptional": false,
+          "description": "Initial PostgreSQL database name, or the matching database selected by the application.",
+          "defaultValue": "bookwyrm"
+        },
+        "POSTGRES_PASSWORD": {
+          "isOptional": false,
+          "description": "PostgreSQL password. Generated for the database and referenced by dependent services; keep private.",
+          "defaultValue": "${{postgres.POSTGRES_PASSWORD}}"
+        },
+        "PGPORT": {
+          "isOptional": false,
+          "description": "Pgport for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "5432"
+        },
+        "REDIS_ACTIVITY_URL": {
+          "isOptional": false,
+          "description": "Redis activity url resolved automatically from the linked service. Keep this reference when using the included topology.",
+          "defaultValue": "redis://:${{redis.REDIS_PASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:6379/0"
+        },
+        "REDIS_BROKER_URL": {
+          "isOptional": false,
+          "description": "Redis broker url resolved automatically from the linked service. Keep this reference when using the included topology.",
+          "defaultValue": "redis://:${{redis.REDIS_PASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:6379/1"
+        },
+        "STATIC_ROOT": {
+          "isOptional": false,
+          "description": "Static root for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "/data/static"
+        },
+        "MEDIA_ROOT": {
+          "isOptional": false,
+          "description": "Media root for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "/data/images"
+        },
+        "EMAIL_HOST": {
+          "isOptional": false,
+          "description": "SMTP server hostname. Leave empty to disable outbound email; set a real host for invitations and password resets.",
+          "defaultValue": ""
+        },
+        "EMAIL_PORT": {
+          "isOptional": false,
+          "description": "Email port for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "587"
+        },
+        "EMAIL_HOST_USER": {
+          "isOptional": false,
+          "description": "SMTP username. Required only when EMAIL_HOST is configured.",
+          "defaultValue": ""
+        },
+        "EMAIL_HOST_PASSWORD": {
+          "isOptional": false,
+          "description": "SMTP password. Required only when EMAIL_HOST is configured.",
+          "defaultValue": ""
+        },
+        "EMAIL_USE_TLS": {
+          "isOptional": false,
+          "description": "Email use tls for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "true"
+        },
+        "EMAIL_USE_SSL": {
+          "isOptional": false,
+          "description": "Email use ssl for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "false"
+        },
+        "UPLOAD_IMAGE_DIMENSIONS": {
+          "isOptional": false,
+          "description": "Upload image dimensions for bookwyrm. The supplied value follows the pinned upstream deployment; change only with its configuration guide.",
+          "defaultValue": "400,1200,2000"
+        },
+        "PORT": {
+          "isOptional": false,
+          "description": "HTTP port inside this service. Keep the default to match its Railway public port and health check.",
+          "defaultValue": "8080"
+        },
+        "RAILWAY_DOCKERFILE_PATH": {
+          "defaultValue": "templates/bookwyrm/Dockerfile",
+          "isOptional": false,
+          "description": "Repository-relative Dockerfile used to build this service. Keep the supplied path."
+        }
+      },
+      "deploy": {
+        "restartPolicyType": "ON_FAILURE",
+        "restartPolicyMaxRetries": 10,
+        "healthcheckPath": "/login",
+        "healthcheckTimeout": 600,
+        "requiredMountPath": "/data"
+      },
+      "networking": {
+        "serviceDomains": {
+          "<hasDomain>:8080": {
+            "port": 8080
+          }
+        }
+      },
+      "build": {
+        "builder": "RAILPACK",
+        "dockerfilePath": "templates/bookwyrm/Dockerfile"
+      },
+      "volumeMounts": {
+        "04375c54-b544-5ae4-9143-2fb28409e11a": {
+          "mountPath": "/data"
+        }
+      }
+    }
+  }
+}
