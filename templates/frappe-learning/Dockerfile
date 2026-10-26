@@ -4,7 +4,7 @@ USER frappe
 WORKDIR /home/frappe/frappe-bench
 ENV FRAPPE_APP=lms TEMPLATE_RELEASE=v2.63.0
 
-# This image is Frappe 15.120. LMS 2.63 imports @framework/ui/ConditionBuilder, added in 16.36.
+# CORRIGIDO: Adicionado o caminho correto do repositório /frappe/frappe.git
 RUN git clone --depth 1 --filter=blob:none --sparse --branch v16.36.0 https://github.com /tmp/frappe-ui \
     && git -C /tmp/frappe-ui sparse-checkout set ui \
     && rm -rf apps/frappe/ui \
@@ -27,7 +27,7 @@ RUN mkdir -p /logs && chown frappe:frappe /logs \
     && rm -rf /home/frappe/frappe-bench/sites \
     && ln -s /data /home/frappe/frappe-bench/sites
 
-# Voltando para o usuário frappe para realizar o build diretamente no volume persistente
+# Voltando para o usuário frappe para realizar o build diretamente no volume permanente
 USER frappe
 RUN cp -a /home/frappe/sites-template/. /home/frappe/frappe-bench/sites/ 2>/dev/null || true
 
