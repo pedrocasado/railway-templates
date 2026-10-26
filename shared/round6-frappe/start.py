@@ -24,6 +24,17 @@ def run(*args):
     if result.returncode:
         raise SystemExit(f"{args[0]} failed (exit {result.returncode}); arguments suppressed")
 
+def forget_shared_asset_map():
+    # Frappe stores this map under a shared Redis key that bench clear-cache does not delete.
+    url = os.environ.get('REDIS_URL', '')
+    if not url:
+        return
+    script = (
+        'import os, redis\n'
+        'redis.Redis.from_url(os.environ["REDIS_URL"]).delete("assets_json")\n'
+    )
+    subprocess.run([str(BENCH / 'env/bin/python'), '-c', script], cwd=BENCH)
+
 def assets_ready(path):
     manifest = path / 'assets.json'
     if not manifest.is_file():
@@ -111,6 +122,7 @@ def main():
     run('bench', '--site', site, 'set-maintenance-mode', 'off')
     # Drop a cached asset map from an earlier boot. Otherwise pages keep linking /website.bundle.css.
     run('bench', '--site', site, 'clear-cache')
+    forget_shared_asset_map()
     port = int(os.environ.get('PORT', '8080'))
     nginx = Path('/opt/railway/nginx.conf').read_text().replace('__SITE__', site).replace('__PORT__', str(port))
     Path('/tmp/frappe-nginx.conf').write_text(nginx)
