@@ -24,6 +24,16 @@ def run(*args):
     if result.returncode:
         raise SystemExit(f"{args[0]} failed (exit {result.returncode}); arguments suppressed")
 
+def assets_ready(path):
+    manifest = path / 'assets.json'
+    if not manifest.is_file():
+        return False
+    try:
+        data = json.loads(manifest.read_text())
+    except json.JSONDecodeError:
+        return False
+    return all(data.get(name) for name in ('website.bundle.css', 'login.bundle.css', 'frappe-web.bundle.js'))
+
 def atomic_json(path, value):
     temp = path.with_suffix('.tmp')
     temp.write_text(json.dumps(value, indent=2) + '\n')
@@ -62,6 +72,16 @@ def main():
             shutil.copytree(source, destination, symlinks=True, dirs_exist_ok=True)
         elif source.exists():
             shutil.copy2(source, destination)
+    # The base image stores the built Frappe bundles outside sites. Without this map,
+    # pages request /website.bundle.css and the login script never loads.
+    baked = BENCH / 'assets'
+    if not assets_ready(DATA / 'assets') and assets_ready(baked):
+        destination = DATA / 'assets'
+        if destination.is_symlink():
+            destination.unlink()
+        elif destination.exists():
+            shutil.rmtree(destination)
+        shutil.copytree(baked, destination, symlinks=True)
     common = DATA / 'common_site_config.json'
     config = json.loads(common.read_text()) if common.exists() else {}
     config.update(db_host=db_host, db_port=db_port,
