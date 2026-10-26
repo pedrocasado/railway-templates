@@ -89,6 +89,8 @@ def main():
         run('bench', '--site', site, 'set-config', 'server_script_enabled', '1')
     run('bench', '--site', site, 'enable-scheduler')
     run('bench', '--site', site, 'set-maintenance-mode', 'off')
+    # Drop a cached asset map from an earlier boot. Otherwise pages keep linking /website.bundle.css.
+    run('bench', '--site', site, 'clear-cache')
     port = int(os.environ.get('PORT', '8080'))
     nginx = Path('/opt/railway/nginx.conf').read_text().replace('__SITE__', site).replace('__PORT__', str(port))
     Path('/tmp/frappe-nginx.conf').write_text(nginx)

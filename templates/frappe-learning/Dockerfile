@@ -17,6 +17,7 @@ RUN git clone --no-checkout https://github.com/frappe/lms.git apps/lms \
     && (cd apps/lms && (yarn install --frozen-lockfile || npm install)) \
     && bench set-config -g socketio_port 9000 \
     && bench build --production --apps frappe,lms \
+    && env/bin/python -c "import json,os; assets=json.load(open('sites/assets/assets.json')); path=assets['website.bundle.css'].lstrip('/'); assert os.path.isfile(os.path.join('sites', path)), path" \
     && env/bin/python -c "import lms" \
     && cp -a sites /home/frappe/sites-template
 USER root
