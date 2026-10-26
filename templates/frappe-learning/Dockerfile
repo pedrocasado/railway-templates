@@ -8,7 +8,7 @@ RUN git clone --no-checkout https://github.com/frappe/lms.git apps/lms \
     && ls -1 apps > sites/apps.txt \
     && env/bin/pip install -q -e apps/payments -e apps/lms \
     && (cd apps/lms && (yarn install --frozen-lockfile || npm install)) \
-    && bench build --production \
+    && bench build --production --apps lms \
     && env/bin/python -c "import lms" \
     && cp -a sites /home/frappe/sites-template
 USER root
